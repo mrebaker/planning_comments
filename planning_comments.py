@@ -29,6 +29,8 @@ if __name__ == '__main__':
         if comments:
             for comment in comments:
                 address = comment.select_one('h3 span', class_='consultationAddress')
+                if address is None:
+                    break
                 results.append({'address': address.text.strip(),
                                 'stance': address.find_next_sibling().text.strip(),
                                 'date_submitted': " ".join(comment.select_one('div h4', class_='commentText').text.split()),
@@ -38,5 +40,5 @@ if __name__ == '__main__':
             time.sleep(2)
 
         else:
-            write_to_csv(results)
             break
+    write_to_csv(results)
