@@ -1,15 +1,15 @@
-from bs4 import BeautifulSoup
 import csv
-import requests
 import time
+
+import requests
+from bs4 import BeautifulSoup
 
 base_url = 'https://planning.n-somerset.gov.uk/online-applications/applicationDetails.do?activeTab=neighbourComments&keyVal=PJML85LPMKI00&neighbourCommentsPager'
 
 
 def write_to_csv(result_list):
-    writer = csv.DictWriter(open('comments.csv', 'w+'),
-                            fieldnames=['address', 'stance', 'date_submitted', 'text'],
-                            newline='')
+    writer = csv.DictWriter(open('comments.csv', 'w+', newline=''),
+                            fieldnames=['address', 'stance', 'date_submitted', 'text'])
     writer.writeheader()
     writer.writerows(result_list)
 
