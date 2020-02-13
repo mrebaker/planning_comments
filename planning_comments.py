@@ -39,17 +39,19 @@ def build_sentiment_model(comment_file_name):
                             fieldnames=['address', 'stance', 'date_submitted', 'text'])
     comments = [comment for comment in reader]
     for comment in comments:
-        sent_tokens = [re.sub(r'[^\w\s]', '', token) for token in sent_tokenize(comment)]
-        comment['sent_tokens_filtered'] = [word for sent in sent_tokens for word in sent if word not in stopwords]
-        comment['POS_tag'] = [nltk.pos_tag(tokenized_sent) for tokenized_sent in comment['sent_tokens_filtered']]
-        comment['adjectives'] = [tag[0] for tag in comment['POS_tag'] if tag[1] == 'ADJ']
+        sent_tokens = [re.sub(r'[^\w\s]', '', token) for token in sent_tokenize(comment['text'])]
+        comment['sent_tokens_filtered'] = [word for sent in sent_tokens
+                                           for word in sent.split()
+                                           if word not in stopwords.words()]
+        comment['POS_tag'] = nltk.pos_tag(comment['sent_tokens_filtered'])
+        comment['adjectives'] = [tag[0] for tag in comment['POS_tag'] if tag[1] in ['JJ', 'JJR', 'JJS']]
 
     json.dump(comments, open('word_model.json', 'w+'))
 
 
 def download_comments(comment_file_name):
     session = requests.session()
-    session.get(base_url)
+    session.get(base_url + '.page=1')
     p = 0
     while True:
         p += 1
@@ -57,7 +59,6 @@ def download_comments(comment_file_name):
         page = session.get(page_url)
         if page.status_code != 200:
             page.raise_for_status()
-
         soup = BeautifulSoup(page.text, "html.parser")
         comments = soup.find_all("div", class_="comment")
         results = extract_comments(comments)
@@ -68,5 +69,5 @@ def download_comments(comment_file_name):
 
 
 if __name__ == '__main__':
-    download_comments('comments.csv')
+    # download_comments('comments.csv')
     build_sentiment_model('comments.csv')
