@@ -12,6 +12,7 @@ from nltk.text import Text
 
 import requests
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 base_url = 'https://planning.n-somerset.gov.uk/online-applications/applicationDetails.do?activeTab=neighbourComments&keyVal=PJML85LPMKI00&neighbourCommentsPager'
 
@@ -34,11 +35,11 @@ def write_to_csv(result_list, filename):
     writer.writerows(result_list)
 
 
-def build_sentiment_model(comment_file_name):
+def extract_adjectives(comment_file_name):
     reader = csv.DictReader(open(comment_file_name, 'r'),
                             fieldnames=['address', 'stance', 'date_submitted', 'text'])
     comments = [comment for comment in reader]
-    for comment in comments:
+    for comment in tqdm(comments):
         sent_tokens = [re.sub(r'[^\w\s]', '', token) for token in sent_tokenize(comment['text'])]
         comment['sent_tokens_filtered'] = [word for sent in sent_tokens
                                            for word in sent.split()
