@@ -50,6 +50,13 @@ def extract_adjectives(comment_file_name):
     json.dump(comments, open('word_model.json', 'w+'))
 
 
+def most_common_adjectives(n):
+    comments = json.load(open('word_model.json', 'r'))
+    adjs = [adj.lower() for comment in comments for adj in comment['adjectives']]
+    all_words = nltk.FreqDist(adjs)
+    return list(all_words.keys())[:n]
+
+
 def download_comments(comment_file_name):
     session = requests.session()
     session.get(base_url + '.page=1')
@@ -71,4 +78,4 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    build_sentiment_model('comments.csv')
+    print(most_common_adjectives(1000))
