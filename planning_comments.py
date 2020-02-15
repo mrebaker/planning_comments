@@ -9,7 +9,7 @@ from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 
 from sklearn.model_selection import train_test_split
-
+from sklearn.metrics import f1_score
 import pickle
 from bs4 import BeautifulSoup
 import numpy as np
@@ -46,9 +46,12 @@ def write_to_csv(result_list, filename):
 def build_classifier(data):
     train, test = train_test_split(data, test_size=0.2, shuffle=True)
     classifier = nltk.NaiveBayesClassifier.train(train)
-    print(nltk.classify.accuracy(classifier, test) * 100)
-    classifier.show_most_informative_features()
     pickle.dump(classifier, open('classifier', 'wb+'))
+    print('accuracy: ', nltk.classify.accuracy(classifier, test) * 100)
+    classifier.show_most_informative_features()
+    y_true = test[:, 1]
+    y_pred = classifier.classify_many(test[:, 0])
+    print('f1 score: ', f1_score(y_true, y_pred, labels=['object', 'support', 'neutral'], average='weighted'))
 
 
 def find_features(word_list, adj_limit):
@@ -108,6 +111,6 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    # n_adjectives = 1000
-    # build_classifier(build_feature_set(n_adjectives))
-    basic_analysis()
+    n_adjectives = 10
+    n_comments = 100
+    build_classifier(build_feature_set(n_adjectives, n_comments))
