@@ -9,13 +9,20 @@ from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 
 from sklearn.model_selection import train_test_split
+
 import pickle
 from bs4 import BeautifulSoup
 import numpy as np
+import pandas as pd
 import requests
 from tqdm import tqdm
 
 base_url = 'https://planning.n-somerset.gov.uk/online-applications/applicationDetails.do?activeTab=neighbourComments&keyVal=PJML85LPMKI00&neighbourCommentsPager'
+
+
+def basic_analysis():
+    df = pd.read_csv('comments.csv', encoding='latin-1', names=['address', 'stance', 'date', 'comment'])
+    print(df['stance'].value_counts())
 
 
 def extract_comments(comments_list):
@@ -41,7 +48,7 @@ def build_classifier(data):
     classifier = nltk.NaiveBayesClassifier.train(train)
     print(nltk.classify.accuracy(classifier, test) * 100)
     classifier.show_most_informative_features()
-    pickle.dump(classifier, open('classifier', 'w+'))
+    pickle.dump(classifier, open('classifier', 'wb+'))
 
 
 def find_features(word_list, adj_limit):
@@ -101,6 +108,6 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    n_adjectives = 100
-    n_comments = 1000
-    build_classifier(build_feature_set(n_adjectives, n_comments))
+    # n_adjectives = 1000
+    # build_classifier(build_feature_set(n_adjectives))
+    basic_analysis()
