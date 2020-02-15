@@ -45,7 +45,6 @@ def build_feature_set(adjective_limit, comment_limit):
     comments = json.load(open('word_model.json', 'r'))[:comment_limit]
     feature_set = [(find_features(comment['adjectives'], adjective_limit), comment['stance'])
                    for comment in comments]
-    feature_set = random.shuffle(feature_set)
     return np.array(feature_set)
 
 
@@ -94,5 +93,6 @@ if __name__ == '__main__':
     # download_comments('comments.csv')
     n_adjectives = 10
     n_comments = 10
-    X_train, X_test, y_train, y_test = train_test_split(build_feature_set(n_adjectives, n_comments), test_size=0.2)
-
+    X_train, X_test, y_train, y_test = train_test_split(build_feature_set(n_adjectives, n_comments),
+                                                        test_size=0.2,
+                                                        shuffle=True)
