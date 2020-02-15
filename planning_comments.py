@@ -9,7 +9,7 @@ from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 
 from sklearn.model_selection import train_test_split
-
+import pickle
 from bs4 import BeautifulSoup
 import numpy as np
 import requests
@@ -36,13 +36,23 @@ def write_to_csv(result_list, filename):
     writer.writerows(result_list)
 
 
+def build_classifier(data):
+    train, test = train_test_split(data, test_size=0.2, shuffle=True)
+    classifier = nltk.NaiveBayesClassifier.train(train)
+    print(nltk.classify.accuracy(classifier, test) * 100)
+    classifier.show_most_informative_features()
+    pickle.dump(classifier, open('classifier', 'w+'))
+
+
 def find_features(word_list, adj_limit):
     word_features = most_common_adjectives(adj_limit)
     return {w: (w in word_list) for w in word_features}
 
 
-def build_feature_set(adjective_limit, comment_limit):
-    comments = json.load(open('word_model.json', 'r'))[:comment_limit]
+def build_feature_set(adjective_limit, comment_limit=None):
+    comments = json.load(open('word_model.json', 'r'))
+    if comment_limit:
+        comments = comments[:comment_limit]
     feature_set = [(find_features(comment['adjectives'], adjective_limit), comment['stance'])
                    for comment in comments]
     return np.array(feature_set)
@@ -91,10 +101,6 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    n_adjectives = 10
-    n_comments = 10
-    data = build_feature_set(n_adjectives, n_comments)
-    X_train, X_test, y_train, y_test = train_test_split(data[:, 0],
-                                                        data[:, 1],
-                                                        test_size=0.2,
-                                                        shuffle=True)
+    n_adjectives = 100
+    n_comments = 1000
+    build_classifier(build_feature_set(n_adjectives, n_comments))
