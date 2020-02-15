@@ -93,6 +93,8 @@ if __name__ == '__main__':
     # download_comments('comments.csv')
     n_adjectives = 10
     n_comments = 10
-    X_train, X_test, y_train, y_test = train_test_split(build_feature_set(n_adjectives, n_comments),
+    data = build_feature_set(n_adjectives, n_comments)
+    X_train, X_test, y_train, y_test = train_test_split(data[:, 0],
+                                                        data[:, 1],
                                                         test_size=0.2,
                                                         shuffle=True)
