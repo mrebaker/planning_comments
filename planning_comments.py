@@ -1,17 +1,18 @@
 import csv
 import json
+import random
 import re
-import string
 import time
 
 import nltk
-from nltk.tokenize import word_tokenize
 from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
-from nltk.text import Text
 
-import requests
+from sklearn.model_selection import train_test_split
+
 from bs4 import BeautifulSoup
+import numpy as np
+import requests
 from tqdm import tqdm
 
 base_url = 'https://planning.n-somerset.gov.uk/online-applications/applicationDetails.do?activeTab=neighbourComments&keyVal=PJML85LPMKI00&neighbourCommentsPager'
@@ -33,6 +34,18 @@ def write_to_csv(result_list, filename):
     writer = csv.DictWriter(open(filename, 'a+', newline=''),
                             fieldnames=['address', 'stance', 'date_submitted', 'text'])
     writer.writerows(result_list)
+
+
+def find_features(word_list):
+    word_features = most_common_adjectives(1000)
+    return {w: (w in word_list) for w in word_features}
+
+
+def build_feature_set():
+    comments = json.load(open('word_model.json', 'r'))
+    feature_set = [(find_features(comment['adjectives']), comment['stance']) for comment in comments]
+    feature_set = random.shuffle(feature_set)
+    return np.array(feature_set)
 
 
 def extract_adjectives(comment_file_name):
@@ -78,4 +91,5 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    print(most_common_adjectives(1000))
+    X_train, X_test, y_train, y_test = train_test_split(build_feature_set(), test_size=0.2)
+
