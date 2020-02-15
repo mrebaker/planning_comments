@@ -36,14 +36,15 @@ def write_to_csv(result_list, filename):
     writer.writerows(result_list)
 
 
-def find_features(word_list):
-    word_features = most_common_adjectives(1000)
+def find_features(word_list, adj_limit):
+    word_features = most_common_adjectives(adj_limit)
     return {w: (w in word_list) for w in word_features}
 
 
-def build_feature_set():
-    comments = json.load(open('word_model.json', 'r'))
-    feature_set = [(find_features(comment['adjectives']), comment['stance']) for comment in comments]
+def build_feature_set(adjective_limit, comment_limit):
+    comments = json.load(open('word_model.json', 'r'))[:comment_limit]
+    feature_set = [(find_features(comment['adjectives'], adjective_limit), comment['stance'])
+                   for comment in comments]
     feature_set = random.shuffle(feature_set)
     return np.array(feature_set)
 
@@ -91,5 +92,7 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    X_train, X_test, y_train, y_test = train_test_split(build_feature_set(), test_size=0.2)
+    n_adjectives = 10
+    n_comments = 10
+    X_train, X_test, y_train, y_test = train_test_split(build_feature_set(n_adjectives, n_comments), test_size=0.2)
 
