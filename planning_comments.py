@@ -47,6 +47,10 @@ def build_classifier(data):
     train, test = train_test_split(data, test_size=0.2, shuffle=True)
     classifier = nltk.NaiveBayesClassifier.train(train)
     pickle.dump(classifier, open('classifier', 'wb+'))
+    return classifier
+
+
+def evaluate_classifier(classifier, test):
     print('accuracy: ', nltk.classify.accuracy(classifier, test) * 100)
     classifier.show_most_informative_features()
     y_true = test[:, 1]
