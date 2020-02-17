@@ -120,10 +120,10 @@ if __name__ == '__main__':
     n_adjectives = 10
     n_comments = 200
     try:
-        data = np.load(f'data_{n_adjectives}_{n_comments}', allow_pickle=True)
+        data = np.load(f'data/data_{n_adjectives}_{n_comments}', allow_pickle=True)
     except FileNotFoundError:
         data = build_feature_set(n_adjectives, n_comments)
-        data.dump(f'data_{n_adjectives}_{n_comments}')
+        data.dump(f'data/data_{n_adjectives}_{n_comments}')
     train, test = train_test_split(data, test_size=0.2, shuffle=True)
     model = build_classifier(train, nltk.DecisionTreeClassifier)
     evaluate_classifier(model, test)
