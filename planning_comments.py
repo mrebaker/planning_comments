@@ -43,18 +43,20 @@ def write_to_csv(result_list, filename):
     writer.writerows(result_list)
 
 
-def build_classifier(data):
-    train, test = train_test_split(data, test_size=0.2, shuffle=True)
-    classifier = nltk.NaiveBayesClassifier.train(train)
-    pickle.dump(classifier, open('classifier', 'wb+'))
-    return classifier
+def build_classifier(train_data, classifier):
+    trained_model = classifier.train(train_data)
+    pickle.dump(trained_model, open('classifier', 'wb+'))
+    return trained_model
 
 
-def evaluate_classifier(classifier, test):
-    print('accuracy: ', nltk.classify.accuracy(classifier, test) * 100)
-    classifier.show_most_informative_features()
-    y_true = test[:, 1]
-    y_pred = classifier.classify_many(test[:, 0])
+def evaluate_classifier(classifier, test_data):
+    y_true = test_data[:, 1]
+    y_pred = classifier.classify_many(test_data[:, 0])
+    print('accuracy: ', nltk.classify.accuracy(classifier, test_data) * 100)
+    if classifier.__class__ == 'nltk.classify.naivebayes.NaiveBayesClassifier':
+        classifier.show_most_informative_features()
+    else:
+        print(classifier.__class__)
     print('f1 score: ', f1_score(y_true, y_pred, labels=['object', 'support', 'neutral'], average='weighted'))
 
 
@@ -117,4 +119,7 @@ if __name__ == '__main__':
     # download_comments('comments.csv')
     n_adjectives = 10
     n_comments = 100
-    build_classifier(build_feature_set(n_adjectives, n_comments))
+    data = build_feature_set(n_adjectives, n_comments)
+    train, test = train_test_split(data, test_size=0.2, shuffle=True)
+    model = build_classifier(train, nltk.DecisionTreeClassifier)
+    evaluate_classifier(model, test)
