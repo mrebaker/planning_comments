@@ -45,7 +45,7 @@ def write_to_csv(result_list, filename):
 
 def build_classifier(train_data, classifier):
     trained_model = classifier.train(train_data)
-    pickle.dump(trained_model, open('classifier', 'wb+'))
+    pickle.dump(trained_model, open(f'classifier-{classifier.__name__}', 'wb+'))
     return trained_model
 
 
