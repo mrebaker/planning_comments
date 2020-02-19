@@ -9,9 +9,10 @@ from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, confusion_matrix
+from sklearn.metrics import f1_score, confusion_matrix, plot_confusion_matrix
 import pickle
 from bs4 import BeautifulSoup
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
@@ -50,6 +51,7 @@ def build_classifier(train_data, classifier):
 
 
 def evaluate_classifier(classifier, test_data):
+    X_test = test_data[:, 0]
     y_true = test_data[:, 1]
     y_pred = classifier.classify_many(test_data[:, 0])
     print('accuracy: ', nltk.classify.accuracy(classifier, test_data) * 100)
@@ -58,7 +60,18 @@ def evaluate_classifier(classifier, test_data):
     else:
         print(classifier.__class__)
     print('f1 score: ', f1_score(y_true, y_pred, labels=['object', 'support', 'neutral'], average='weighted'))
-    print(confusion_matrix(y_true, y_pred))
+    print(confusion_matrix(y_true, y_pred, normalize='true'))
+    try:
+        disp = plot_confusion_matrix(classifier, X_test, y_true,
+                                     display_labels=['Neutral', 'Object', 'Support'],
+                                     cmap=plt.cm.Blues,
+                                     normalize='true'
+                                     )
+    except ValueError:
+        print('Classifier is not from sklearn - cannot use inbuilt plotting function')
+        # todo - make this work with nltk classifiers
+        return
+    plt.show()
 
 
 def find_features(word_list, adj_limit):
