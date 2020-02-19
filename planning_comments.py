@@ -9,7 +9,7 @@ from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, confusion_matrix
 import pickle
 from bs4 import BeautifulSoup
 import numpy as np
@@ -58,6 +58,7 @@ def evaluate_classifier(classifier, test_data):
     else:
         print(classifier.__class__)
     print('f1 score: ', f1_score(y_true, y_pred, labels=['object', 'support', 'neutral'], average='weighted'))
+    print(confusion_matrix(y_true, y_pred))
 
 
 def find_features(word_list, adj_limit):
@@ -117,8 +118,8 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    n_adjectives = 10
-    n_comments = 200
+    n_adjectives = 1000
+    n_comments = 0
     try:
         data = np.load(f'data/data_{n_adjectives}_{n_comments}', allow_pickle=True)
     except FileNotFoundError:
