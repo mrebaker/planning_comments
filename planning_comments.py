@@ -44,9 +44,16 @@ def write_to_csv(result_list, filename):
     writer.writerows(result_list)
 
 
-def build_classifier(train_data, classifier):
-    trained_model = classifier.train(train_data)
+def build_classifier(n_adj, n_comm, classifier):
+    try:
+        data = np.load(f'data/data_{n_adj}_{n_comm}', allow_pickle=True)
+    except FileNotFoundError:
+        data = build_feature_set(n_adj, n_comm)
+        data.dump(f'data/data_{n_adj}_{n_comm}')
+    train, test = train_test_split(data, test_size=0.2, shuffle=True)
+    trained_model = classifier.train(train)
     pickle.dump(trained_model, open(f'classifier-{classifier.__name__}', 'wb+'))
+    evaluate_classifier(trained_model, test)
     return trained_model
 
 
@@ -133,11 +140,4 @@ if __name__ == '__main__':
     # download_comments('comments.csv')
     n_adjectives = 1000
     n_comments = 0
-    try:
-        data = np.load(f'data/data_{n_adjectives}_{n_comments}', allow_pickle=True)
-    except FileNotFoundError:
-        data = build_feature_set(n_adjectives, n_comments)
-        data.dump(f'data/data_{n_adjectives}_{n_comments}')
-    train, test = train_test_split(data, test_size=0.2, shuffle=True)
-    model = build_classifier(train, nltk.DecisionTreeClassifier)
-    evaluate_classifier(model, test)
+    model = build_classifier(n_adjectives, n_comments, nltk.DecisionTreeClassifier)
