@@ -26,6 +26,25 @@ def basic_analysis():
     print(df['stance'].value_counts())
 
 
+def comments_to_db(comment_file_name):
+    reader = csv.DictReader(open(comment_file_name, 'r'), fieldnames=['address', 'stance', 'date_submitted', 'text'])
+    conn = sqlite3.connect('comments.db')
+    conn.execute('''CREATE TABLE IF NOT EXISTS comments (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        address TEXT,
+                        stance INTEGER,
+                        comment_text TEXT,
+                        date TEXT)''')
+
+    conn.commit()
+    for comment in reader:
+        conn.execute('INSERT INTO comments (address, stance, comment_text, date)'
+                     'VALUES (?, ?, ?, ?)',
+                     (comment['address'], comment['stance'], comment['text'], comment['date_submitted']))
+
+    conn.commit()
+
+
 def extract_comments(comments_list):
     return_list = []
     for comment in comments_list:
@@ -134,6 +153,7 @@ def download_comments(comment_file_name):
             break
         write_to_csv(results, comment_file_name)
         time.sleep(2)
+    comments_to_db(comment_file_name)
 
 
 if __name__ == '__main__':
