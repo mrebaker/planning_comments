@@ -35,7 +35,6 @@ def comments_to_db(comment_file_name):
                         stance INTEGER,
                         comment_text TEXT,
                         date TEXT)''')
-
     conn.commit()
     for comment in reader:
         conn.execute('INSERT INTO comments (address, stance, comment_text, date)'
@@ -43,6 +42,15 @@ def comments_to_db(comment_file_name):
                      (comment['address'], comment['stance'], comment['text'], comment['date_submitted']))
 
     conn.commit()
+    db_cleanup()
+
+
+def db_cleanup():
+    conn = sqlite3.connect('comments.db')
+    conn.execute('''UPDATE comments SET stance = CASE stance 
+                    WHEN '(Objects)' THEN -1 
+                    WHEN '(Supports)' THEN 1 
+                    WHEN '(Neutral)' THEN 0 END''')
 
 
 def extract_comments(comments_list):
