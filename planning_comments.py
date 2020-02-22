@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime as dt
 import json
 import re
 import sqlite3
@@ -29,7 +30,8 @@ def basic_analysis():
 def comments_to_db(comment_file_name):
     reader = csv.DictReader(open(comment_file_name, 'r'), fieldnames=['address', 'stance', 'date_submitted', 'text'])
     conn = sqlite3.connect('comments.db')
-    conn.execute('''CREATE TABLE IF NOT EXISTS comments (
+    conn.execute('''DROP TABLE IF EXISTS comments''')
+    conn.execute('''CREATE TABLE comments (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         address TEXT,
                         stance INTEGER,
@@ -37,9 +39,10 @@ def comments_to_db(comment_file_name):
                         date_submitted TEXT)''')
     conn.commit()
     for comment in reader:
+        date_str = dt.strptime(comment['date_submitted'], 'Comment submitted date: %a %d %b %Y').strftime('%Y-%m-%d')
         conn.execute('INSERT INTO comments (address, stance, comment_text, date_submitted)'
                      'VALUES (?, ?, ?, ?)',
-                     (comment['address'], comment['stance'], comment['text'], comment['date_submitted']))
+                     (comment['address'], comment['stance'], comment['text'], date_str))
 
     conn.commit()
     db_cleanup()
@@ -166,6 +169,4 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    n_adjectives = 1000
-    n_comments = 0
-    model = build_classifier(n_adjectives, n_comments, nltk.DecisionTreeClassifier)
+    comments_to_db('comments.csv')
