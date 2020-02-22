@@ -54,6 +54,7 @@ def db_cleanup():
                     WHEN '(Objects)' THEN -1 
                     WHEN '(Supports)' THEN 1 
                     WHEN '(Neutral)' THEN 0 END''')
+    conn.commit()
 
 
 def extract_comments(comments_list):
