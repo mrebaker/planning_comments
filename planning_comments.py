@@ -34,10 +34,10 @@ def comments_to_db(comment_file_name):
                         address TEXT,
                         stance INTEGER,
                         comment_text TEXT,
-                        date TEXT)''')
+                        date_submitted TEXT)''')
     conn.commit()
     for comment in reader:
-        conn.execute('INSERT INTO comments (address, stance, comment_text, date)'
+        conn.execute('INSERT INTO comments (address, stance, comment_text, date_submitted)'
                      'VALUES (?, ?, ?, ?)',
                      (comment['address'], comment['stance'], comment['text'], comment['date_submitted']))
 
