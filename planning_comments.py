@@ -77,6 +77,7 @@ def locale_analysis(locale):
                             GROUP BY stance, locale""", {'loc': locale}).fetchall()
     df = pd.DataFrame(table, columns=['comments', 'stance', 'locale'])
     df = df.pivot(index='locale', columns='stance')
+    df.columns.set_levels(['oppose', 'neutral', 'support'], level=1, inplace=True)
     print(df)
 
 
