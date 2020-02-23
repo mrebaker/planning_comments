@@ -1,4 +1,5 @@
 data/*
 classifier*
 comments.db
+comments.csv
 planning_comments_scratch.ipynb
