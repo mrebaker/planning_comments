@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 import requests
 from tqdm import tqdm
 
@@ -79,6 +80,8 @@ def locale_analysis(locale):
     df = df.pivot(index='locale', columns='stance')
     df.columns.set_levels(['oppose', 'neutral', 'support'], level=1, inplace=True)
     print(df)
+    fig = go.Figure(go.Heatmap(z=df.values, x=df.columns.get_level_values(1), y=df.index, colorscale='teal'))
+    fig.show()
 
 
 def write_to_csv(result_list, filename):
