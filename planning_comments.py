@@ -69,6 +69,17 @@ def extract_comments(comments_list):
     return return_list
 
 
+def locale_analysis(locale):
+    conn = sqlite3.connect('comments.db')
+    table = conn.execute("""SELECT count(*), stance, CASE WHEN instr(lower(address), lower(:loc)) THEN :loc 
+                            ELSE 'Outside ' || :loc  END as locale
+                            FROM comments
+                            GROUP BY stance, locale""", {'loc': locale}).fetchall()
+    df = pd.DataFrame(table, columns=['comments', 'stance', 'locale'])
+    df = df.pivot(index='locale', columns='stance')
+    print(df)
+
+
 def write_to_csv(result_list, filename):
     writer = csv.DictWriter(open(filename, 'a+', newline=''),
                             fieldnames=['address', 'stance', 'date_submitted', 'text'])
@@ -170,4 +181,5 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    comments_to_db('comments.csv')
+    locale_analysis('Bath')
+
