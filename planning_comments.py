@@ -17,6 +17,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 import requests
 from tqdm import tqdm
 
@@ -76,12 +77,36 @@ def locale_analysis(locale):
                             ELSE 'Outside ' || :loc  END as locale
                             FROM comments
                             GROUP BY stance, locale""", {'loc': locale}).fetchall()
+    # heatmap
     df = pd.DataFrame(table, columns=['comments', 'stance', 'locale'])
     df = df.pivot(index='locale', columns='stance')
     df.columns.set_levels(['oppose', 'neutral', 'support'], level=1, inplace=True)
     print(df)
     fig = go.Figure(go.Heatmap(z=df.values, x=df.columns.get_level_values(1), y=df.index, colorscale='teal'))
     fig.show()
+
+    # stacked bar
+    df2 = pd.DataFrame(table, columns=['comments', 'stance', 'locale'])
+    fig2 = px.bar(df2, x='locale', y='comments', color='stance')
+    fig2.show()
+
+    # 100% stacked bar
+    table2 = conn.execute("""SELECT A.comment_count, A.stance, A.locale, 
+                                    (1.0 * A.comment_count / B.comment_total) as comment_ratio
+                              FROM (SELECT count(*) as comment_count, stance, 
+                                        CASE WHEN instr(lower(address), lower(:loc)) THEN :loc 
+                                        ELSE 'Outside ' || :loc END as locale
+                                    FROM comments 
+                                    GROUP BY stance, locale) AS A
+                              LEFT JOIN (SELECT count(*) as comment_total, stance, 
+                                            CASE WHEN instr(lower(address), lower(:loc)) THEN :loc 
+                                            ELSE 'Outside ' || :loc END as locale
+                                         FROM comments 
+                                         GROUP BY locale) AS B
+                              ON A.locale = B.locale""", {'loc': locale}).fetchall()
+    df3 = pd.DataFrame(table2, columns=['comment_count', 'stance', 'locale', 'comment_ratio'])
+    fig3 = px.bar(df3, x='locale', y='comment_ratio', color='stance')
+    fig3.show()
 
 
 def write_to_csv(result_list, filename):
@@ -185,5 +210,4 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    locale_analysis('Bath')
-
+    locale_analysis('Bristol')
