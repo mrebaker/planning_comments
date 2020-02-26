@@ -14,6 +14,7 @@ from sklearn.metrics import f1_score, confusion_matrix, plot_confusion_matrix
 import pickle
 from bs4 import BeautifulSoup
 from matplotlib import pyplot as plt
+import geocoder
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -155,6 +156,14 @@ def evaluate_classifier(classifier, test_data):
 def find_features(word_list, adj_limit):
     word_features = most_common_adjectives(adj_limit)
     return {w: (w in word_list) for w in word_features}
+
+
+def geocode_addresses(address_list):
+    vol_limit = 100
+    session = requests.session()
+    # todo - set up session login
+    coded_addresses = {address: geocoder.google(address) for address in address_list[:vol_limit]}
+    json.dump(coded_addresses, open('address_dump.json'))
 
 
 def build_feature_set(adjective_limit, comment_limit=None):
