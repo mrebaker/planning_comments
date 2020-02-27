@@ -164,9 +164,9 @@ def geocode_addresses(address_list):
     config = yaml.safe_load(open('_config.yml'))
     api_key = config['google_api_key']
     with requests.Session() as session:
-        coded_addresses = {address: geocoder.google(address, key=api_key, session=session)
+        coded_addresses = {address: geocoder.google(address, key=api_key, session=session).latlng
                            for address in address_list[:vol_limit]}
-    json.dump(coded_addresses, open('address_dump.json'))
+    json.dump(coded_addresses, open('address_dump.json', 'w+'))
 
 
 def build_feature_set(adjective_limit, comment_limit=None):
@@ -222,4 +222,4 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    locale_analysis('Bristol')
+    geocode_addresses(['1 Corn Street Bristol BS1 1YH'])
