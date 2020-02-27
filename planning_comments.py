@@ -21,6 +21,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import requests
 from tqdm import tqdm
+import yaml
 
 base_url = 'https://planning.n-somerset.gov.uk/online-applications/applicationDetails.do?activeTab=neighbourComments&keyVal=PJML85LPMKI00&neighbourCommentsPager'
 
@@ -159,10 +160,12 @@ def find_features(word_list, adj_limit):
 
 
 def geocode_addresses(address_list):
-    vol_limit = 100
-    session = requests.session()
-    # todo - set up session login
-    coded_addresses = {address: geocoder.google(address) for address in address_list[:vol_limit]}
+    vol_limit = 10
+    config = yaml.safe_load(open('_config.yml'))
+    api_key = config['google_api_key']
+    with requests.Session() as session:
+        coded_addresses = {address: geocoder.google(address, key=api_key, session=session)
+                           for address in address_list[:vol_limit]}
     json.dump(coded_addresses, open('address_dump.json'))
 
 
