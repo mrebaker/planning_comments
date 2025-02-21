@@ -159,13 +159,14 @@ def find_features(word_list, adj_limit):
     return {w: (w in word_list) for w in word_features}
 
 
-def geocode_addresses(address_list):
-    vol_limit = 10
+def geocode_addresses():
+    conn = sqlite3.connect('comments.db')
+    address_list = conn.execute('''SELECT id, address_text FROM address WHERE lat IS NULL''').fetchmany(10)
     config = yaml.safe_load(open('_config.yml'))
     api_key = config['google_api_key']
     with requests.Session() as session:
-        coded_addresses = {address: geocoder.google(address, key=api_key, session=session).latlng
-                           for address in address_list[:vol_limit]}
+        coded_addresses = {address[0]: geocoder.google(address[1], key=api_key, session=session).latlng
+                           for address in address_list}
     json.dump(coded_addresses, open('address_dump.json', 'w+'))
 
 
@@ -222,4 +223,4 @@ def download_comments(comment_file_name):
 
 if __name__ == '__main__':
     # download_comments('comments.csv')
-    geocode_addresses(['1 Corn Street Bristol BS1 1YH'])
+    geocode_addresses()
